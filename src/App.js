@@ -1,57 +1,48 @@
-import React, { useState } from "react";
+import React, { Suspense } from "react";
+import { Redirect, Route, Switch } from "react-router-dom";
+// import AllQuotes from "./pages/AllQuotes";
+// import QuoteDetail from "./pages/QuoteDetail";
+// import NewQuote from "./pages/NewQuote";
+import Layout from "./components/layout/Layout";
+// import NotFound from "./pages/NotFound";
+import LoadingSpinner from "./components/ui/LoadingSpinner";
 
-import CourseGoalList from "./components/CourseGoals/CourseGoalList/CourseGoalList";
-import CourseInput from "./components/CourseGoals/CourseInput/CourseInput";
-import "./App.css";
+const NewQuote = React.lazy(() => import("./pages/NewQuote"));
+const AllQuotes = React.lazy(() => import("./pages/AllQuotes"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
+const QuoteDetail = React.lazy(() => import("./pages/QuoteDetail"));
 
-const App = () => {
-  const [courseGoals, setCourseGoals] = useState([
-    { text: "Add new Goals :)", id: "g1" },
-    { text: "Delete completed goals by clicking on it !", id: "g2" },
-  ]);
-
-  const addGoalHandler = (enteredText) => {
-    setCourseGoals((prevGoals) => {
-      const updatedGoals = [...prevGoals];
-      updatedGoals.unshift({ text: enteredText, id: Math.random().toString() });
-      return updatedGoals;
-    });
-  };
-
-  const deleteItemHandler = (goalId) => {
-    setCourseGoals((prevGoals) => {
-      const updatedGoals = prevGoals.filter((goal) => goal.id !== goalId);
-      return updatedGoals;
-    });
-  };
-
-  let content = (
-    <p style={{ textAlign: "center" }}>No goals found. Maybe add one?</p>
-  );
-
-  if (courseGoals.length > 0) {
-    content = (
-      <CourseGoalList items={courseGoals} onDeleteItem={deleteItemHandler} />
-    );
-  }
-
+function App() {
   return (
-    <div>
-      <section id="goal-form">
-        <CourseInput onAddGoal={addGoalHandler} />
-      </section>
-      <section id="goals">
-        {content}
-        {/* {courseGoals.length > 0 && (
-          <CourseGoalList
-            items={courseGoals}
-            onDeleteItem={deleteItemHandler}
-          />
-        ) // <p style={{ textAlign: 'center' }}>No goals found. Maybe add one?</p>
-        } */}
-      </section>
-    </div>
+    <Layout>
+      <Suspense
+        fallback={
+          <div className="centered">
+            <LoadingSpinner />
+          </div>
+        }
+      >
+        <Switch>
+          <Route path="/" exact>
+            <Redirect to="/quotes"></Redirect>
+          </Route>
+          <Route path="/quotes" exact>
+            <AllQuotes></AllQuotes>
+          </Route>
+
+          <Route path="/quotes/:quoteId">
+            <QuoteDetail></QuoteDetail>
+          </Route>
+          <Route path="/new-quote">
+            <NewQuote></NewQuote>
+          </Route>
+          <Route path="*">
+            <NotFound />
+          </Route>
+        </Switch>
+      </Suspense>
+    </Layout>
   );
-};
+}
 
 export default App;
